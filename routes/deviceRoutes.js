@@ -47,6 +47,27 @@ router.get('/current-sensor-data/:deviceId', async (req, res) => {
       res.status(500).json({ error: 'Error fetching current sensor data' });
     }
   });
-  
+router.post('/update-sensor-data', async (req, res) => {
+  const { deviceId, temperature, humidity } = req.body;
+
+  try {
+    // Tìm thiết bị bằng `deviceId` và cập nhật dữ liệu cảm biến
+    const device = await Device.findById(deviceId);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+
+    // Cập nhật dữ liệu cảm biến
+    device.temperature = temperature;
+    device.humidity = humidity;
+    device.lastUpdated = new Date();
+
+    await device.save();
+
+    res.status(200).json({ success: true, message: 'Sensor data updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error updating sensor data' });
+  }
+});
 
 module.exports = router;
